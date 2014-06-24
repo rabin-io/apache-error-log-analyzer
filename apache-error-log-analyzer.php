@@ -1,15 +1,15 @@
 #!/usr/bin/php
 <?php
 
-//var_dump($argc, $argv); exit;
-
+// open a file or read from stdin
 $fp = ($argc === 1)  ? fopen('php://stdin', 'r') : @fopen($argv[1], "r");
 
 $i=0;
 $skip_lines = 0;
-$errors = array();
-$regexs = array();
-#$regexs[] = '/(PHP [A-Za-z]+): (.+)/';
+$errors = array(); // hold the error logs messages, count and ref
+$regexs = array(); 
+
+// the regex must be in 2 parts part1 will be the message header, part2 will be the the error details.
 $regexs[] = '/(PHP Notice:  Undefined variable): (.+)/';
 $regexs[] = '/(PHP Notice:  Undefined index): (.+)/';
 $regexs[] = '/(PHP Notice:  Undefined offset): (.+)/';
@@ -32,6 +32,7 @@ $regexs[] = '/(script not found or unable to stat): ([-_A-Za-z0-9\.]+)/';
 $regexs[] = "/(script) ('[-_A-Za-z0-9\.\/]+' not found or unable to stat)/";
 $regexs[] = "/(File name too long): (.{30})/";
 
+// for XML compatbility there are some char we need to replace
 $xml_replace = array(' ', ':', '(', ')');
 
 if ($fp) {
@@ -46,9 +47,9 @@ if ($fp) {
 
 			if ( preg_match($reg, $line[0], $matches) ) { //stderr(var_dump($matches));
 
-				//$matches[0] - all the string == line[0]
-				//$matches[1] - 1st part of the match == PHP Notice:  Undefined variable
-				//$matches[2] - 2nd part              == name in /xy/z.php on line 46
+				//$matches[0] - all the string        == line[0]
+				//$matches[1] - 1st part of the match == e.g PHP Notice:  Undefined variable
+				//$matches[2] - 2nd part              ==     name in /xy/z.php on line 46
 
 				$m += count($matches);     // to know if a line was not mached aginst any rule
 				if ( !isset($matches[2]) ) // debug
@@ -62,9 +63,6 @@ if ($fp) {
 				}
 				
 				$error_name = str_replace($xml_replace, '_', $matches[1]); // only for XML compatbility
-				//$matches[1] = str_replace($xml_replace, '_', $matches[1]); // only for XML compatbility
-
-				//stderr(var_dump($matches[1]));
 				
 				if ( isset ($errors[$error_name][$hash] ) ) {
 					$errors[$error_name][$hash]['count']++;
@@ -84,28 +82,23 @@ if ($fp) {
 						$errors[$error_name][$hash]['ref'][$hash_ref]['count'] = 1;
 					}
 				}
-				//stderr($errors);
+				
 			}
 		}
 		if (!$m) { // not in the regex array
 			$errors['other']['line_' . $i]['msg'] = $line[0];
 		}
 
-        // limit
-        //if ($i>25) {break;} else {continue;};
     }
     
     
     
     if (!feof($fp)) {
-        //echo "Error: unexpected fgets() fail\n";
         fwrite(STDERR, "Error: unexpected fgets() fail on line $i\n");
     }
     
     fclose($fp);
-    
-    
-    //print_r($errors);
+
     echo array2xml($errors);
 }
 ?>
@@ -130,9 +123,9 @@ function array2xml($array, $xml = false){
         if(is_array($value)){
             array2xml($value, $xml->addChild($key));
         }else{
-			//var_dump($key, $value);
-            //$xml->addChild($key, str_replace('&', '~', htmlentities($value))); // XML can handle & on childe
-			$xml->addAttribute($key,str_replace('&', '~', htmlentities($value)));
+			
+            //$xml->addChild($key, str_replace('&', '~', htmlentities($value))); // XML can't handle & on childe
+            $xml->addAttribute($key,str_replace('&', '~', htmlentities($value)));
         }
     }
     return $xml->asXML();
