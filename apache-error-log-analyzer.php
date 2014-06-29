@@ -13,7 +13,8 @@ $regexs = array();
 $regexs[] = '/(PHP Notice:  Undefined variable): (.+)/';
 $regexs[] = '/(PHP Notice:  Undefined index): (.+)/';
 $regexs[] = '/(PHP Notice:  Undefined offset): (.+)/';
-$regexs[] = '/(PHP Warning:  include\(.*\)): (.+)/';
+//$regexs[] = '/(PHP Warning:  include\(.*\)): (.+)/';
+$regexs[] = '/(PHP Warning): (.+)/';
 $regexs[] = '/(Permission denied): (.+)/';
 $regexs[] = '/(Symbolic link not allowed or link target not accessible): (.+)/';
 $regexs[] = '/(Directory index forbidden by Options directive): (.+)/';
@@ -85,13 +86,23 @@ if ($fp) {
 				
 			}
 		}
-		if (!$m) { // not in the regex array
-			$errors['other']['line_' . $i]['msg'] = $line[0];
+		if (!$m) // not in the regex array
+        { 
+            $hash = 'id_' . hash('crc32', $line[0] );
+            if ( isset($errors['other'][$hash]) )
+            {
+                $errors['other'][$hash]['count']++;
+            }
+            else
+            {
+                $errors['other'][$hash]['count'] = 1;
+                $errors['other'][$hash]['line']  = $i;
+                $errors['other'][$hash]['msg']   = trim($line[0], "\n ");
+            }
+
 		}
 
     }
-    
-    
     
     if (!feof($fp)) {
         fwrite(STDERR, "Error: unexpected fgets() fail on line $i\n");
@@ -124,7 +135,10 @@ function array2xml($array, $xml = false){
             array2xml($value, $xml->addChild($key));
         }else{
 			
+            // only childs
             //$xml->addChild($key, str_replace('&', '~', htmlentities($value))); // XML can't handle & on childe
+
+            // last level are keys
             $xml->addAttribute($key,str_replace('&', '~', htmlentities($value)));
         }
     }
