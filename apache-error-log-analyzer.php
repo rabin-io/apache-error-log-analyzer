@@ -33,7 +33,7 @@ $regexs[] = '/(script not found or unable to stat): ([-_A-Za-z0-9\.]+)/';
 $regexs[] = "/(script) ('[-_A-Za-z0-9\.\/]+' not found or unable to stat)/";
 $regexs[] = "/(File name too long): (.{30})/";
 
-// for XML compatbility there are some char we need to replace
+// for XML compatibility there are some char we need to replace
 $xml_replace = array(' ', ':', '(', ')');
 
 if ($fp) {
@@ -79,8 +79,8 @@ if ($fp) {
 						$errors[$error_name][$hash]['ref'][$hash_ref]['count']++ ;
 					}
 					else {
-						$errors[$error_name][$hash]['ref'][$hash_ref]['msg']   = trim($line[1],"\n ");
 						$errors[$error_name][$hash]['ref'][$hash_ref]['count'] = 1;
+                        $errors[$error_name][$hash]['ref'][$hash_ref]['msg']   = trim($line[1],"\n ");
 					}
 				}
 				
@@ -110,13 +110,25 @@ if ($fp) {
     
     fclose($fp);
 
+    // sort the errors by there counters
+    foreach ($errors as $key => &$items) 
+    { 
+        uasort($items, "cmp"); 
+    }
+    
     echo array2xml($errors);
-}
+
+} // if ($fp) {
+    
 ?>
+
 
 <?php
 
-function stderr($mix) {
+function cmp ($a, $b) { return $a['count'] < $b['count'] ; }
+
+function stderr($mix) 
+{
 	if ( is_string($mix) ) 	{
 		fwrite(STDERR, $mix);
 	}
@@ -125,25 +137,40 @@ function stderr($mix) {
 	}
 }
 
-function array2xml($array, $xml = false){
+function array2xml($array, $xml = false)
+{
 
-    if($xml === false){
-        $xml = new SimpleXMLElement('<apache_errors/>');
-    }
+    if ( $xml === false ) { $xml = new SimpleXMLElement('<apache_errors/>'); }
+
     foreach($array as $key => $value){
-        if(is_array($value)){
-            array2xml($value, $xml->addChild($key));
-        }else{
+        if(is_array($value))
+        {
+            if ( preg_match('/id_([A-Za-z0-9]+)/', $key, $matches) ) 
+            {
+                array2xml(array_merge( $value, array ('id' => $matches[1]) ), $xml->addChild("item") );               
+            }
+            else
+            {
+                array2xml($value, $xml->addChild($key));            
+            }
+        }
+        else
+        {
 			
-            // only childs
+            /* only childs */
             //$xml->addChild($key, str_replace('&', '~', htmlentities($value))); // XML can't handle & on childe
 
             // last level are keys
             $xml->addAttribute($key,str_replace('&', '~', htmlentities($value)));
+            
         }
+        
     }
+    
     return $xml->asXML();
+    
 }
+
 
 ?>
 
