@@ -15,6 +15,7 @@ $regexs[] = '/(PHP Notice:  Undefined index): (.+)/';
 $regexs[] = '/(PHP Notice:  Undefined offset): (.+)/';
 //$regexs[] = '/(PHP Warning:  include\(.*\)): (.+)/';
 $regexs[] = '/(PHP Warning): (.+)/';
+$regexs[] = '/(PHP Fatal error):  (.+)/';
 $regexs[] = '/(Permission denied): (.+)/';
 $regexs[] = '/(Symbolic link not allowed or link target not accessible): (.+)/';
 $regexs[] = '/(Directory index forbidden by Options directive): (.+)/';
