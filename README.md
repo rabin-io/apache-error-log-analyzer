@@ -1,7 +1,7 @@
-Useage
-======
+Quick Start
+===========
 
-* Basic useage
+* Basic usage
 ```bash
     $ php -f apache-error-log-analyzer.php /var/log/httpd/error.log
 ```
