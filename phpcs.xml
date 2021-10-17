@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<ruleset name="Alfa">
+    <description>Based on PSR12 coding standard.</description>
+
+    <arg name="parallel" value="75"/>
+    <arg name="report-width" value="auto"/>
+
+    <file>apache-error-log-analyzer.php</file>
+    <file>helper_functions.php</file>
+    <!-- <file>routes/</file> -->
+    <!-- <exclude-pattern>vendor</exclude-pattern> -->
+    <!-- <exclude-pattern>resources</exclude-pattern> -->
+    <!-- <exclude-pattern>database/</exclude-pattern>-->
+    <!-- <exclude-pattern>storage/</exclude-pattern> -->
+    <!-- <exclude-pattern>node_modules/</exclude-pattern> -->
+
+    <rule ref="PSR12">
+        <exclude name="Generic.Files.LineLength"/>
+        <exclude name="PSR12.Traits.UseDeclaration"/>
+    </rule>
+    <rule ref="Generic.Classes.DuplicateClassName"/>
+<!--    <rule ref="Generic.CodeAnalysis.UselessOverridingMethod"/>-->
+    <rule ref="Generic.Files.ByteOrderMark"/>
+    <rule ref="Generic.Files.LineEndings"/>
+    <rule ref="Generic.NamingConventions.ConstructorName"/>
+    <rule ref="Generic.PHP.DeprecatedFunctions"/>
+    <rule ref="Generic.PHP.DisallowShortOpenTag"/>
+    <rule ref="Generic.PHP.ForbiddenFunctions"/>
+    <rule ref="Generic.PHP.LowerCaseConstant"/>
+    <rule ref="Generic.PHP.NoSilencedErrors"/>
+    <rule ref="Generic.WhiteSpace.DisallowTabIndent"/>
+    <rule ref="MySource.PHP.EvalObjectFactory"/>
+<!--    <rule ref="PSR2.Files.EndFileNewline"/>-->
+    <rule ref="Squiz.PHP.Eval"/>
+    <rule ref="Squiz.PHP.LowercasePHPFunctions"/>
+    <rule ref="Squiz.PHP.NonExecutableCode"/>
+
+    <!-- Ban some functions -->
+    <rule ref="Generic.PHP.ForbiddenFunctions">
+        <properties>
+            <property name="forbiddenFunctions" type="array">
+                <element key="sizeof" value="count"/>
+                <element key="delete" value="unset"/>
+                <element key="print" value="echo"/>
+<!--                <element key="is_null" value="null"/>-->
+                <element key="create_function" value="null"/>
+            </property>
+        </properties>
+    </rule>
+</ruleset>

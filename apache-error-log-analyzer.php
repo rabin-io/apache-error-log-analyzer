@@ -1,65 +1,16 @@
 <?php
+
 /**
- * A simple script so parse apache error log
+ * A simple script so parse Apache error log
  **/
-
-function cmp($a, $b)
-{
-    return $a['count'] < $b['count'] ;
-}
-
-/**
- * Write to STDERR
- *
- * @return void
- */
-function stderr($mix)
-{
-    if (is_string($mix)) {
-        fwrite(STDERR, $mix);
-    } else {
-        fwrite(STDERR, print_r($mix, true));
-    }
-}
-
-/**
- * Convert an Array to XML
- *
- * @return string
- **/
-function array2xml($array, $xml = false)
-{
-    if ($xml === false) {
-        $xml = new SimpleXMLElement('<apache_errors/>');
-    }
-
-    foreach ($array as $key => $value) {
-        if (is_array($value)) {
-            if (preg_match('/id_([A-Za-z0-9]+)/', $key, $matches)) {
-                array2xml(array_merge($value, array('id' => $matches[1])), $xml->addChild("item"));
-            } else {
-                array2xml($value, $xml->addChild($key));
-            }
-        } else {
-
-            /* only childs */
-            //$xml->addChild($key, str_replace('&', '~', htmlentities($value))); // XML can't handle & on childe
-
-            // last level are keys
-            $xml->addAttribute($key, str_replace('&', '~', htmlentities($value)));
-        }
-    }
-
-    return $xml->asXML();
-}
 
 // open a file or read from stdin
-$fp = ($argc === 1) ? fopen('php://stdin', 'r') : @fopen($argv[1], "r");
+$fp = ($argc === 1) ? fopen('php://stdin', 'r') : fopen($argv[1], "r");
 
-$i=0;
+$i          = 0;
 $skip_lines = 0;
-$errors = array(); // hold the error logs messages, count and ref
-$regexs = array();
+$errors     = array(); // hold the error logs messages, count and ref
+$regexs     = array();
 
 /* the regex must be in 2 parts
    part1 will be the message header,
@@ -105,7 +56,7 @@ if ($fp) {
         $line = explode(', referer: ', $line[3]); // break on ref
         //print_r($line); stderr(var_dump($line));
         $m = 0;
-        foreach ($regexs as $key=> $reg) {
+        foreach ($regexs as $key => $reg) {
             if (preg_match($reg, $line[0], $matches)) { //stderr(var_dump($matches));
                 // to know if a line was not matched against any rule
                 $m += count($matches);
